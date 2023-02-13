@@ -18,6 +18,7 @@ describe('getButtonProps', () => {
     shouldThrowIntegrationError: true
     };
     const defaultArgs = {
+        experiments: {},
         facilitatorAccessToken,
         brandedDefault,
         paymentSource,

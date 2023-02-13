@@ -4,7 +4,7 @@ import { onClick as onElementClick, querySelectorAll, noop, stringifyErrorMessag
 import { COUNTRY, FPTI_KEY, type FundingEligibilityType } from '@paypal/sdk-constants/src';
 import { ZalgoPromise } from '@krakenjs/zalgo-promise/src';
 
-import type { ContentType, Wallet, PersonalizationType, FeatureFlags, InlinePaymentFieldsEligibility } from '../types';
+import type { ContentType, Wallet, PersonalizationType, Experiments, FeatureFlags, InlinePaymentFieldsEligibility } from '../types';
 import { getLogger, getSmartFieldsByFundingSource, setBuyerAccessToken } from '../lib';
 import { type FirebaseConfig } from '../api';
 import { DATA_ATTRIBUTES, BUYER_INTENT, FPTI_STATE } from '../constants';
@@ -38,6 +38,7 @@ export type SetupButtonOptions = {|
     cookies : string,
     personalization : PersonalizationType,
     brandedDefault? : boolean | null,
+    experiments?: Experiments;
     featureFlags: FeatureFlags,
     smartWalletOrderID? : string,
     enableOrdersApprovalSmartWallet? : boolean,
@@ -72,6 +73,7 @@ export function setupButton({
     personalization,
     correlationID: buttonCorrelationID = '',
     brandedDefault = null,
+    experiments = {},
     featureFlags,
     smartWalletOrderID,
     enableOrdersApprovalSmartWallet,
@@ -104,7 +106,7 @@ export function setupButton({
 
     const { merchantID, buyerCountry } = serviceData;
 
-    const props = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: null, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID });
+    const props = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: null, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID, experiments });
     const { env, sessionID, partnerAttributionID, commit, sdkCorrelationID, locale, onShippingChange,
         buttonSessionID, merchantDomain, onInit,
         getPrerenderDetails, rememberFunding, getQueriedEligibleFunding, experience,
@@ -203,7 +205,7 @@ export function setupButton({
             event.preventDefault();
             event.stopPropagation();
 
-            const paymentProps = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: paymentFundingSource, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID });
+            const paymentProps = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: paymentFundingSource, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID, experiments });
 
             const payPromise = initiatePayment({ payment, props: paymentProps });
             const { onError } = paymentProps;
@@ -245,7 +247,7 @@ export function setupButton({
                 throw new Error(`Can not find button element`);
             }
 
-            const paymentProps = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: paymentFundingSource, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID });
+            const paymentProps = getButtonProps({ facilitatorAccessToken, brandedDefault, paymentSource: paymentFundingSource, featureFlags, enableOrdersApprovalSmartWallet, smartWalletOrderID, experiments });
             const payment = { win, button, fundingSource: paymentFundingSource, card, buyerIntent: BUYER_INTENT.PAY };
             const payPromise = initiatePayment({ payment, props: paymentProps });
             const { onError } = paymentProps;
